@@ -24,12 +24,13 @@ body {
 }
 
 .tokenizer,
-.lexer,
+.parser,
 .transformer,
 .result {
     flex-grow: 1;
     margin-top: 10px;
     background-color: #f1f1f1;
+    padding: 10px;
 }
 
 .header {
