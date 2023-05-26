@@ -6,7 +6,5 @@ export const tokenize = (code) => {
             return isNaN(token) ? { type: 'word', value: token } : { type: 'number', value: token };
         });
 
-    const tokenizerElement = document.querySelector('.tokenizer');
-    tokenizerElement.textContent = JSON.stringify(result, null, 2);
     return result;
 };
