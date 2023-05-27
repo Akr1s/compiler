@@ -7,3 +7,5 @@ export const debounce = (func, timeout = 300) => {
         }, timeout);
     };
 };
+
+export const isNumber = (char) => !Number.isNaN(Number.parseFloat(char));
