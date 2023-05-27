@@ -36,6 +36,14 @@ body {
     border-top: 10px solid darkgreen;
 }
 
+.tokenizer.error,
+.parser.error,
+.transformer.error,
+.result.error {
+    border-top-color: red;
+    white-space: pre-wrap;
+}
+
 .header {
     font-weight: bold;
     text-align: center;

@@ -13,8 +13,17 @@ const handleCodeAreaChange = (event) => {
     const resultElement = document.querySelector('.result');
     const code = event.target.value;
 
-    const tokens = tokenize(code);
-    tokenizerElement.textContent = JSON.stringify(tokens, null, 2);
+    const displayResults = (data, error, element) => {
+        if (!!error) {
+            element.classList.add('error');
+        } else {
+            element.classList.remove('error');
+        }
+        element.textContent = JSON.stringify(error || data, null, 2);
+    };
+
+    const { tokens, error } = tokenize(code);
+    displayResults(tokens, error, tokenizerElement);
 
     const ast = parse(tokens);
     parserElement.textContent = JSON.stringify(ast, null, 2);

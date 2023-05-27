@@ -32,10 +32,7 @@ export const tokenize = (code) => {
 
             tokens.push({ type: 'number', value: token, start, end });
         } else {
-            error = {
-                type: 'error',
-                value: `Error on line ${line}:${linePos}: Invalid token ❝${token}❞.`,
-            };
+            error = `Error on line ${line}:${linePos}: Invalid token ❝${token}❞.`;
             break;
         }
     }
