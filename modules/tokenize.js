@@ -7,14 +7,13 @@ export const tokenize = (code) => {
 
     let error = null;
     const tokens = [];
-    const _tokens = code
-        .replace(/[\n\r]/g, ' *nl* ')
-        .split(/[\f\v ]+/)
-        .filter(Boolean);
+    const _tokens = code.replace(/[\n\r]/g, ' *nl* ').split(' ');
 
     for (let i = 0; i < _tokens.length; i++) {
         const token = _tokens[i];
-        if (token === '*nl*') {
+        if (!token) {
+            linePos++;
+        } else if (token === '*nl*') {
             line++;
             linePos = 1;
 
@@ -32,7 +31,7 @@ export const tokenize = (code) => {
 
             tokens.push({ type: 'number', value: token, start, end });
         } else {
-            error = `Error on line ${line}:${linePos}: Invalid token ❝${token}❞.`;
+            error = `Error on line (${line}:${linePos}): Invalid token ❝${token}❞.`;
             break;
         }
     }
