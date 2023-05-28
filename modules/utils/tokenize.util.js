@@ -1,11 +1,12 @@
-import { isNumber } from './utils.js';
+import { isNumber } from './functions.util.js';
+import { allowedKeywords } from '../constants/keywords.constant.js';
+import { TOKEN_TYPES } from '../constants/token-types.constant.js';
+import { TokenizerError } from '../error.class.js';
 
 export const tokenize = (code) => {
     let linePos = 1;
     let line = 1;
-    const allowedKeywords = ['paper', 'pen', 'line'];
 
-    let error = null;
     const tokens = [];
     const _tokens = code.replace(/[\n\r]/g, ' *nl* ').split(' ');
 
@@ -17,24 +18,23 @@ export const tokenize = (code) => {
             line++;
             linePos = 1;
 
-            tokens.push({ type: 'newline' });
+            tokens.push({ type: TOKEN_TYPES.NEWLINE });
         } else if (allowedKeywords.includes(token)) {
             const start = linePos;
             const end = start + token.length - 1;
             linePos = end + 2;
 
-            tokens.push({ type: 'keyword', value: token, start, end });
+            tokens.push({ type: TOKEN_TYPES.KEYWORD, value: token, start, end, line });
         } else if (isNumber(token)) {
             const start = linePos;
             const end = start + token.length - 1;
             linePos = end + 2;
 
-            tokens.push({ type: 'number', value: token, start, end });
+            tokens.push({ type: TOKEN_TYPES.NUMBER, value: token, start, end, line });
         } else {
-            error = `Error on line (${line}:${linePos}): Invalid token ❝${token}❞.`;
-            break;
+            throw new TokenizerError(line, linePos, `Invalid token ❝${token}❞.`);
         }
     }
 
-    return { error, tokens };
+    return tokens;
 };
