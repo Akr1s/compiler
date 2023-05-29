@@ -18,7 +18,9 @@ export const analizeStepResults = (callback, element) => {
         try {
             result = callback(data);
             element.classList.remove('error');
-            element.textContent = JSON.stringify(result, null, 2);
+
+            const isString = typeof result === 'string';
+            element.textContent = isString ? result : JSON.stringify(result, null, 2);
         } catch (error) {
             if (error instanceof CompilerError) {
                 const errorMessage = `${error.name}: ${error.message}`;

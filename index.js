@@ -7,7 +7,6 @@ import { transform } from './modules/utils/transform.util.js';
 const codeArea = document.querySelector('#code-area');
 
 const handleCodeAreaChange = (event) => {
-    const resultElement = document.querySelector('.result');
     const code = event.target.value;
 
     const tokens = analizeStepResults(tokenize, document.querySelector('.tokenizer'))(code);
@@ -16,9 +15,7 @@ const handleCodeAreaChange = (event) => {
         transform,
         document.querySelector('.transformer'),
     )(ast);
-
-    const resultCode = generateCode(transformedAst);
-    resultElement.textContent = JSON.stringify(resultCode, null, 2);
+    analizeStepResults(generateCode, document.querySelector('.result'))(transformedAst);
 };
 
 codeArea.addEventListener('input', debounce(handleCodeAreaChange, 2000));
