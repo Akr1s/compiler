@@ -1,7 +1,7 @@
 import { isNumber } from './functions.util.js';
 import { allowedKeywords } from '../constants/keywords.constant.js';
 import { TOKEN_TYPES } from '../constants/token-types.constant.js';
-import { TokenizerError } from '../error.class.js';
+import { CompilerError } from '../error.class.js';
 
 export const tokenize = (code) => {
     let linePos = 1;
@@ -32,7 +32,7 @@ export const tokenize = (code) => {
 
             tokens.push({ type: TOKEN_TYPES.NUMBER, value: token, start, end, line });
         } else {
-            throw new TokenizerError(line, linePos, `Invalid token ❝${token}❞.`);
+            throw new CompilerError(line, linePos, `Invalid token ❝${token}❞.`);
         }
     }
 

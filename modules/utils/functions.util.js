@@ -30,3 +30,9 @@ export const analizeStepResults = (callback, element) => {
         return result;
     };
 };
+
+export function getGrayscaleColor(percentage) {
+    var color_part_dec = (255 * percentage) / 100;
+    var color_part_hex = Number(parseInt(color_part_dec, 10)).toString(16);
+    return '#' + color_part_hex + color_part_hex + color_part_hex;
+}
