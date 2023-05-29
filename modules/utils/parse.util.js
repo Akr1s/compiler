@@ -1,17 +1,70 @@
 import { NODE_TYPES } from '../constants/node-types.constant.js';
-import { isNumber } from './functions.util.js';
 import { KEYWORDS } from '../constants/keywords.constant.js';
 import { TOKEN_TYPES } from '../constants/token-types.constant.js';
 import { CompilerError } from '../error.class.js';
 
+const nodeTypes = {
+    [TOKEN_TYPES.NUMBER]: NODE_TYPES.NUMBER_LITERAL
+}
+
+const argumentsTypesMap = {
+    [KEYWORDS.PAPER]: [TOKEN_TYPES.NUMBER, TOKEN_TYPES.NUMBER],
+    [KEYWORDS.PEN]: [TOKEN_TYPES.NUMBER],
+    [KEYWORDS.LINE]: [TOKEN_TYPES.NUMBER, TOKEN_TYPES.NUMBER, TOKEN_TYPES.NUMBER, TOKEN_TYPES.NUMBER],
+}
+
+const getKeywordArguments = (initialToken, initialPosition, tokens) => {
+    let currentPosition = initialPosition;
+    const keywordArguments = argumentsTypesMap[initialToken.value];
+    const argumentsCount = keywordArguments.length;
+    const args = [];
+
+    for (let i = 0; i < argumentsCount; i++) {
+        currentPosition++;
+        const argumentType = keywordArguments[i];
+        const argument = tokens[currentPosition];
+        if (!argument || argument.type === TOKEN_TYPES.NEWLINE) {
+            throw new CompilerError(
+                initialToken.line,
+                initialToken.end + 2,
+                `Missing arguments: ${initialToken.value} requires ${argumentsCount} arguments.`,
+            );
+        } else if (argument.type !== argumentType) {
+            throw new CompilerError(
+                argument.line,
+                argument.start,
+                `Type error: provided argument is not a ${argumentType}.`,
+            );
+        }
+
+        args.push({
+            type: nodeTypes[argumentType],
+            value: argument.value,
+        });
+    }
+
+    currentPosition++;
+    const newlineToken = tokens[currentPosition];
+    if (newlineToken && newlineToken.type !== TOKEN_TYPES.NEWLINE) {
+        throw new CompilerError(
+            newlineToken.line,
+            newlineToken.start,
+            'Expecting an end of line.',
+        );
+    }
+    currentPosition++;
+    const positionShift = currentPosition - initialPosition;
+
+    return { args, positionShift }
+}
+
 export const parse = (tokens) => {
     const body = [];
-    let pos = 0;
+    let position = 0;
     let isPaper = false;
-    let isPen = false;
 
-    while (pos < tokens.length) {
-        const token = tokens[pos];
+    while (position < tokens.length) {
+        const token = tokens[position];
 
         if (token.type === TOKEN_TYPES.KEYWORD)
             switch (token.value) {
@@ -23,65 +76,15 @@ export const parse = (tokens) => {
                             'Paper is already defined.',
                         );
                     }
-
+                    const { args, positionShift } = getKeywordArguments(token, position, tokens)
                     const declaration = {
                         type: NODE_TYPES.PAPER_DECLARATION,
                         name: KEYWORDS.PAPER,
-                        arguments: [],
+                        arguments: args,
                     };
 
-                    pos++;
-                    const firstArgument = tokens[pos];
-                    if (!firstArgument || firstArgument.type === TOKEN_TYPES.NEWLINE) {
-                        throw new CompilerError(
-                            token.line,
-                            token.end + 2,
-                            'Missing arguments. Paper requires two arguments: width and height.',
-                        );
-                    } else if (!isNumber(firstArgument.value)) {
-                        throw new CompilerError(
-                            firstArgument.line,
-                            firstArgument.start,
-                            'Type error. Paper width should be a number.',
-                        );
-                    }
-                    declaration.arguments.push({
-                        type: NODE_TYPES.NUMBER_LITERAL,
-                        value: firstArgument.value,
-                    });
-
-                    pos++;
-                    const secondArgument = tokens[pos];
-                    if (!secondArgument || secondArgument.type === TOKEN_TYPES.NEWLINE) {
-                        throw new CompilerError(
-                            token.line,
-                            firstArgument.end + 2,
-                            'Missing arguments. Paper requires second argument - height.',
-                        );
-                    } else if (!isNumber(secondArgument.value)) {
-                        throw new CompilerError(
-                            secondArgument.line,
-                            secondArgument.start,
-                            'Type error. Paper height should be a number.',
-                        );
-                    }
-                    declaration.arguments.push({
-                        type: NODE_TYPES.NUMBER_LITERAL,
-                        value: secondArgument.value,
-                    });
-
-                    pos++;
-                    const lastToken = tokens[pos];
-                    if (lastToken && lastToken.type !== TOKEN_TYPES.NEWLINE) {
-                        throw new CompilerError(
-                            lastToken.line,
-                            lastToken.start,
-                            'Expecting an end of line.',
-                        );
-                    }
-
                     body.push(declaration);
-                    pos++;
+                    position += positionShift
                     isPaper = true;
                     break;
                 }
@@ -93,46 +96,15 @@ export const parse = (tokens) => {
                             'Paper should be defined first.',
                         );
                     }
-
+                    const { args, positionShift } = getKeywordArguments(token, position, tokens)
                     const declaration = {
                         type: NODE_TYPES.PEN_DECLARATION,
                         name: KEYWORDS.PEN,
-                        arguments: [],
+                        arguments: args,
                     };
 
-                    pos++;
-                    const firstArgument = tokens[pos];
-                    if (!firstArgument || firstArgument.type === TOKEN_TYPES.NEWLINE) {
-                        throw new CompilerError(
-                            token.line,
-                            token.end + 2,
-                            'Missing arguments. Pen requires one argument: color.',
-                        );
-                    } else if (!isNumber(firstArgument.value)) {
-                        throw new CompilerError(
-                            firstArgument.line,
-                            firstArgument.start,
-                            'Type error. Pen color should be a number.',
-                        );
-                    }
-                    declaration.arguments.push({
-                        type: NODE_TYPES.NUMBER_LITERAL,
-                        value: firstArgument.value,
-                    });
-
-                    pos++;
-                    const lastToken = tokens[pos];
-                    if (lastToken && lastToken.type !== TOKEN_TYPES.NEWLINE) {
-                        throw new CompilerError(
-                            lastToken.line,
-                            lastToken.start,
-                            'Expecting an end of line.',
-                        );
-                    }
-
                     body.push(declaration);
-                    pos++;
-                    isPen = true;
+                    position += positionShift;
                     break;
                 }
                 case KEYWORDS.LINE: {
@@ -143,104 +115,15 @@ export const parse = (tokens) => {
                             'Paper should be defined first.',
                         );
                     }
+                    const { args, positionShift } = getKeywordArguments(token, position, tokens)
                     const declaration = {
                         type: NODE_TYPES.LINE_DECLARATION,
                         name: KEYWORDS.LINE,
-                        arguments: [],
+                        arguments: args,
                     };
 
-                    pos++;
-                    const firstArgument = tokens[pos];
-                    if (!firstArgument || firstArgument.type === TOKEN_TYPES.NEWLINE) {
-                        throw new CompilerError(
-                            token.line,
-                            token.end + 2,
-                            'Missing arguments. Line requires four arguments: xStart, yStart, xEnd, yEnd.',
-                        );
-                    } else if (!isNumber(firstArgument.value)) {
-                        throw new CompilerError(
-                            firstArgument.line,
-                            firstArgument.start,
-                            'Type error. Line xStart should be a number.',
-                        );
-                    }
-                    declaration.arguments.push({
-                        type: NODE_TYPES.NUMBER_LITERAL,
-                        value: firstArgument.value,
-                    });
-
-                    pos++;
-                    const secondArgument = tokens[pos];
-                    if (!secondArgument || secondArgument.type === TOKEN_TYPES.NEWLINE) {
-                        throw new CompilerError(
-                            token.line,
-                            firstArgument.end + 2,
-                            'Missing arguments. Line requires four arguments: xStart, yStart, xEnd, yEnd.',
-                        );
-                    } else if (!isNumber(secondArgument.value)) {
-                        throw new CompilerError(
-                            secondArgument.line,
-                            secondArgument.start,
-                            'Type error. Line yStart should be a number.',
-                        );
-                    }
-                    declaration.arguments.push({
-                        type: NODE_TYPES.NUMBER_LITERAL,
-                        value: secondArgument.value,
-                    });
-
-                    pos++;
-                    const third = tokens[pos];
-                    if (!third || third.type === TOKEN_TYPES.NEWLINE) {
-                        throw new CompilerError(
-                            token.line,
-                            firstArgument.end + 2,
-                            'Missing arguments. Line requires four arguments: xStart, yStart, xEnd, yEnd.',
-                        );
-                    } else if (!isNumber(third.value)) {
-                        throw new CompilerError(
-                            third.line,
-                            third.start,
-                            'Type error. Line xEnd should be a number.',
-                        );
-                    }
-                    declaration.arguments.push({
-                        type: NODE_TYPES.NUMBER_LITERAL,
-                        value: third.value,
-                    });
-
-                    pos++;
-                    const fourth = tokens[pos];
-                    if (!fourth || fourth.type === TOKEN_TYPES.NEWLINE) {
-                        throw new CompilerError(
-                            token.line,
-                            token.end + 2,
-                            'Missing arguments. Line requires four arguments: xStart, yStart, xEnd, yEnd.',
-                        );
-                    } else if (!isNumber(fourth.value)) {
-                        throw new CompilerError(
-                            fourth.line,
-                            fourth.start,
-                            'Type error. Line yEnd should be a number.',
-                        );
-                    }
-                    declaration.arguments.push({
-                        type: NODE_TYPES.NUMBER_LITERAL,
-                        value: fourth.value,
-                    });
-
-                    pos++;
-                    const lastToken = tokens[pos];
-                    if (lastToken && lastToken.type !== TOKEN_TYPES.NEWLINE) {
-                        throw new CompilerError(
-                            lastToken.line,
-                            lastToken.start,
-                            'Expecting an end of line.',
-                        );
-                    }
-
                     body.push(declaration);
-                    pos++;
+                    position += positionShift;
                     break;
                 }
             }

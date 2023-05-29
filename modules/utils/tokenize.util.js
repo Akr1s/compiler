@@ -30,7 +30,7 @@ export const tokenize = (code) => {
             const end = start + token.length - 1;
             linePos = end + 2;
 
-            tokens.push({ type: TOKEN_TYPES.NUMBER, value: token, start, end, line });
+            tokens.push({ type: TOKEN_TYPES.NUMBER, value: Number(token), start, end, line });
         } else {
             throw new CompilerError(line, linePos, `Invalid token ❝${token}❞.`);
         }
