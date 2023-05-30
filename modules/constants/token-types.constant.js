@@ -1,5 +1,6 @@
 export const TOKEN_TYPES = {
-    NEWLINE: 'newline',
-    KEYWORD: 'keyword',
-    NUMBER: 'number',
+    NEWLINE: 'NEWLINE',
+    STRING: 'STRING',
+    NUMBER: 'NUMBER',
+    SPECIAL_CHARACTER: 'SPECIAL_CHARACTER',
 };

@@ -31,7 +31,7 @@ body {
     padding-top: 10px;
     background-color: #f1f1f1;
     padding: 10px;
-    white-space: pre-line;
+    white-space: pre;
     overflow-y: auto;
     border-top: 10px solid darkgreen;
 }
@@ -41,7 +41,7 @@ body {
 .transformer.error,
 .result.error {
     border-top-color: red;
-    white-space: pre-wrap;
+    white-space: pre-line;
 }
 
 .header {

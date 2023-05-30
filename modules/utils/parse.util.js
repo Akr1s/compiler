@@ -4,14 +4,19 @@ import { TOKEN_TYPES } from '../constants/token-types.constant.js';
 import { CompilerError } from '../error.class.js';
 
 const nodeTypes = {
-    [TOKEN_TYPES.NUMBER]: NODE_TYPES.NUMBER_LITERAL
-}
+    [TOKEN_TYPES.NUMBER]: NODE_TYPES.NUMBER_LITERAL,
+};
 
 const argumentsTypesMap = {
     [KEYWORDS.PAPER]: [TOKEN_TYPES.NUMBER, TOKEN_TYPES.NUMBER],
     [KEYWORDS.PEN]: [TOKEN_TYPES.NUMBER],
-    [KEYWORDS.LINE]: [TOKEN_TYPES.NUMBER, TOKEN_TYPES.NUMBER, TOKEN_TYPES.NUMBER, TOKEN_TYPES.NUMBER],
-}
+    [KEYWORDS.LINE]: [
+        TOKEN_TYPES.NUMBER,
+        TOKEN_TYPES.NUMBER,
+        TOKEN_TYPES.NUMBER,
+        TOKEN_TYPES.NUMBER,
+    ],
+};
 
 const getKeywordArguments = (initialToken, initialPosition, tokens) => {
     let currentPosition = initialPosition;
@@ -46,17 +51,19 @@ const getKeywordArguments = (initialToken, initialPosition, tokens) => {
     currentPosition++;
     const newlineToken = tokens[currentPosition];
     if (newlineToken && newlineToken.type !== TOKEN_TYPES.NEWLINE) {
-        throw new CompilerError(
-            newlineToken.line,
-            newlineToken.start,
-            'Expecting an end of line.',
-        );
+        throw new CompilerError(newlineToken.line, newlineToken.start, 'Expecting an end of line.');
     }
     currentPosition++;
     const positionShift = currentPosition - initialPosition;
 
-    return { args, positionShift }
-}
+    return { args, positionShift };
+};
+
+const checkPaper = (isPaper) => {
+    if (!isPaper) {
+        throw new CompilerError(token.line, token.start, 'Paper should be defined first.');
+    }
+};
 
 export const parse = (tokens) => {
     const body = [];
@@ -66,7 +73,7 @@ export const parse = (tokens) => {
     while (position < tokens.length) {
         const token = tokens[position];
 
-        if (token.type === TOKEN_TYPES.KEYWORD)
+        if (token.type === TOKEN_TYPES.STRING)
             switch (token.value) {
                 case KEYWORDS.PAPER: {
                     if (isPaper) {
@@ -76,7 +83,7 @@ export const parse = (tokens) => {
                             'Paper is already defined.',
                         );
                     }
-                    const { args, positionShift } = getKeywordArguments(token, position, tokens)
+                    const { args, positionShift } = getKeywordArguments(token, position, tokens);
                     const declaration = {
                         type: NODE_TYPES.PAPER_DECLARATION,
                         name: KEYWORDS.PAPER,
@@ -84,19 +91,13 @@ export const parse = (tokens) => {
                     };
 
                     body.push(declaration);
-                    position += positionShift
+                    position += positionShift;
                     isPaper = true;
                     break;
                 }
                 case KEYWORDS.PEN: {
-                    if (!isPaper) {
-                        throw new CompilerError(
-                            token.line,
-                            token.start,
-                            'Paper should be defined first.',
-                        );
-                    }
-                    const { args, positionShift } = getKeywordArguments(token, position, tokens)
+                    checkPaper(isPaper);
+                    const { args, positionShift } = getKeywordArguments(token, position, tokens);
                     const declaration = {
                         type: NODE_TYPES.PEN_DECLARATION,
                         name: KEYWORDS.PEN,
@@ -108,14 +109,8 @@ export const parse = (tokens) => {
                     break;
                 }
                 case KEYWORDS.LINE: {
-                    if (!isPaper) {
-                        throw new CompilerError(
-                            token.line,
-                            token.start,
-                            'Paper should be defined first.',
-                        );
-                    }
-                    const { args, positionShift } = getKeywordArguments(token, position, tokens)
+                    checkPaper(isPaper);
+                    const { args, positionShift } = getKeywordArguments(token, position, tokens);
                     const declaration = {
                         type: NODE_TYPES.LINE_DECLARATION,
                         name: KEYWORDS.LINE,
@@ -125,6 +120,13 @@ export const parse = (tokens) => {
                     body.push(declaration);
                     position += positionShift;
                     break;
+                }
+                default: {
+                    throw new CompilerError(
+                        token.line,
+                        token.start,
+                        `Invalid keyword "${token.value}"`,
+                    );
                 }
             }
     }
