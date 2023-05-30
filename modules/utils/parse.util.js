@@ -2,25 +2,11 @@ import { NODE_TYPES } from '../constants/node-types.constant.js';
 import { KEYWORDS } from '../constants/keywords.constant.js';
 import { TOKEN_TYPES } from '../constants/token-types.constant.js';
 import { CompilerError } from '../error.class.js';
+import { argumentsMap } from '../constants/arguments-map.constant.js';
 
 const nodeTypes = {
     [TOKEN_TYPES.NUMBER]: NODE_TYPES.NUMBER_LITERAL,
     [TOKEN_TYPES.STRING]: NODE_TYPES.STRING_LITERAL,
-};
-
-const argumentsMap = {
-    [KEYWORDS.PAPER]: [
-        { name: 'width', types: [TOKEN_TYPES.NUMBER] },
-        { name: 'height', types: [TOKEN_TYPES.NUMBER] },
-        { name: 'color', types: [TOKEN_TYPES.NUMBER, TOKEN_TYPES.STRING] },
-    ],
-    [KEYWORDS.PEN]: [{ name: 'color', types: [TOKEN_TYPES.NUMBER, TOKEN_TYPES.STRING] }],
-    [KEYWORDS.LINE]: [
-        { name: 'xStart', types: [TOKEN_TYPES.NUMBER] },
-        { name: 'yStart', types: [TOKEN_TYPES.NUMBER] },
-        { name: 'xEnd', types: [TOKEN_TYPES.NUMBER] },
-        { name: 'yEnd', types: [TOKEN_TYPES.NUMBER] },
-    ],
 };
 
 const isValidColor = (strColor) => {
