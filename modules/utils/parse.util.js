@@ -5,45 +5,66 @@ import { CompilerError } from '../error.class.js';
 
 const nodeTypes = {
     [TOKEN_TYPES.NUMBER]: NODE_TYPES.NUMBER_LITERAL,
+    [TOKEN_TYPES.STRING]: NODE_TYPES.STRING_LITERAL,
 };
 
-const argumentsTypesMap = {
-    [KEYWORDS.PAPER]: [TOKEN_TYPES.NUMBER, TOKEN_TYPES.NUMBER],
-    [KEYWORDS.PEN]: [TOKEN_TYPES.NUMBER],
-    [KEYWORDS.LINE]: [
-        TOKEN_TYPES.NUMBER,
-        TOKEN_TYPES.NUMBER,
-        TOKEN_TYPES.NUMBER,
-        TOKEN_TYPES.NUMBER,
+const argumentsMap = {
+    [KEYWORDS.PAPER]: [
+        { name: 'width', types: [TOKEN_TYPES.NUMBER] },
+        { name: 'height', types: [TOKEN_TYPES.NUMBER] },
+        { name: 'color', types: [TOKEN_TYPES.NUMBER, TOKEN_TYPES.STRING] },
     ],
+    [KEYWORDS.PEN]: [{ name: 'color', types: [TOKEN_TYPES.NUMBER, TOKEN_TYPES.STRING] }],
+    [KEYWORDS.LINE]: [
+        { name: 'xStart', types: [TOKEN_TYPES.NUMBER] },
+        { name: 'yStart', types: [TOKEN_TYPES.NUMBER] },
+        { name: 'xEnd', types: [TOKEN_TYPES.NUMBER] },
+        { name: 'yEnd', types: [TOKEN_TYPES.NUMBER] },
+    ],
+};
+
+const isValidColor = (strColor) => {
+    var s = new Option().style;
+    s.color = strColor;
+
+    return s.color === strColor;
 };
 
 const getKeywordArguments = (initialToken, initialPosition, tokens) => {
     let currentPosition = initialPosition;
-    const keywordArguments = argumentsTypesMap[initialToken.value];
+    const keywordArguments = argumentsMap[initialToken.value];
     const argumentsCount = keywordArguments.length;
     const args = [];
 
     for (let i = 0; i < argumentsCount; i++) {
         currentPosition++;
-        const argumentType = keywordArguments[i];
+        const requiredArgument = keywordArguments[i];
         const argument = tokens[currentPosition];
+
         if (!argument || argument.type === TOKEN_TYPES.NEWLINE) {
             throw new CompilerError(
                 initialToken.line,
                 initialToken.end + 2,
                 `Missing arguments: ${initialToken.value} requires ${argumentsCount} arguments.`,
             );
-        } else if (argument.type !== argumentType) {
+        } else if (!requiredArgument.types.includes(argument.type)) {
             throw new CompilerError(
                 argument.line,
                 argument.start,
-                `Type error: provided argument is not a ${argumentType}.`,
+                `Type error: ${requiredArgument.name} is not a ${requiredArgument.types.join(
+                    ' or ',
+                )}.`,
+            );
+        } else if (argument.type === TOKEN_TYPES.STRING && !isValidColor(argument.value)) {
+            throw new CompilerError(
+                argument.line,
+                argument.start,
+                `Error: "${argument.value}" is not a valid color.`,
             );
         }
 
         args.push({
-            type: nodeTypes[argumentType],
+            type: nodeTypes[argument.type],
             value: argument.value,
         });
     }

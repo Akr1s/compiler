@@ -3,4 +3,5 @@ export const NODE_TYPES = {
     LINE_DECLARATION: 'LineDeclaration',
     PEN_DECLARATION: 'PenDeclaration',
     NUMBER_LITERAL: 'NumberLiteral',
+    STRING_LITERAL: 'StringLiteral',
 };

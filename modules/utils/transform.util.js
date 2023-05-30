@@ -4,7 +4,7 @@ import { getGrayscaleColor } from './functions.util.js';
 
 const createFunctions = {
     [KEYWORDS.PAPER]: function (scope, params) {
-        const [width, heigth] = params.map((param) => param.value);
+        const [width, heigth, color] = params.map((param) => param.value);
 
         return {
             tag: 'rect',
@@ -13,7 +13,7 @@ const createFunctions = {
                 y: 0,
                 width: width,
                 height: heigth,
-                fill: 'gray',
+                fill: color,
             },
             body: [],
         };
@@ -65,7 +65,9 @@ export const transform = (ast) => {
 
         if ([NODE_TYPES.LINE_DECLARATION, NODE_TYPES.PEN_DECLARATION].includes(node.type)) {
             if (node.name === KEYWORDS.PEN) {
-                scope.penColor = getGrayscaleColor(node.arguments[0].value);
+                const colorValue = node.arguments[0].value;
+                scope.penColor =
+                    typeof colorValue === 'number' ? getGrayscaleColor(colorValue) : colorValue;
             } else {
                 const element = createFunctions[node.name](scope, node.arguments, scope.penColor);
                 if (!element) {
