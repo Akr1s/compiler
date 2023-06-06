@@ -34,6 +34,37 @@ const createFunctions = {
             body: [],
         };
     },
+    [KEYWORDS.RECT]: function (scope, params, penColor) {
+        const [x, y, width, height, fill] = params.map((param) => param.value);
+
+        return {
+            tag: 'rect',
+            attr: {
+                x,
+                y,
+                width,
+                height,
+                stroke: penColor,
+                fill: fill,
+            },
+            body: [],
+        };
+    },
+    [KEYWORDS.CIRCLE]: function (scope, params, penColor) {
+        const [cx, cy, r, fill] = params.map((param) => param.value);
+
+        return {
+            tag: 'circle',
+            attr: {
+                cx,
+                cy,
+                r,
+                stroke: penColor,
+                fill: fill,
+            },
+            body: [],
+        };
+    },
 };
 
 export const transform = (ast) => {
@@ -63,7 +94,7 @@ export const transform = (ast) => {
     for (let i = 1; i < body.length; i++) {
         const node = ast.body[i];
 
-        if ([NODE_TYPES.LINE_DECLARATION, NODE_TYPES.PEN_DECLARATION].includes(node.type)) {
+        if ([NODE_TYPES.LINE_DECLARATION, NODE_TYPES.PEN_DECLARATION, NODE_TYPES.RECTANGLE_DECLARATION,NODE_TYPES.CIRCLE_DECLARATION].includes(node.type)) {
             if (node.name === KEYWORDS.PEN) {
                 const colorValue = node.arguments[0].value;
                 scope.penColor =

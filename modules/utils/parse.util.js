@@ -128,6 +128,32 @@ export const parse = (tokens) => {
                     position += positionShift;
                     break;
                 }
+                case KEYWORDS.RECT: {
+                    checkPaper(isPaper);
+                    const { args, positionShift } = getKeywordArguments(token, position, tokens);
+                    const declaration = {
+                        type: NODE_TYPES.RECTANGLE_DECLARATION,
+                        name: KEYWORDS.RECT,
+                        arguments: args,
+                    };
+
+                    body.push(declaration);
+                    position += positionShift;
+                    break;
+                }
+                case KEYWORDS.CIRCLE: {
+                    checkPaper(isPaper);
+                    const { args, positionShift } = getKeywordArguments(token, position, tokens);
+                    const declaration = {
+                        type: NODE_TYPES.CIRCLE_DECLARATION,
+                        name: KEYWORDS.CIRCLE,
+                        arguments: args,
+                    };
+
+                    body.push(declaration);
+                    position += positionShift;
+                    break;
+                }
                 default: {
                     throw new CompilerError(
                         token.line,

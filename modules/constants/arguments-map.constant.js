@@ -14,4 +14,17 @@ export const argumentsMap = {
         { name: 'xEnd', types: [TOKEN_TYPES.NUMBER] },
         { name: 'yEnd', types: [TOKEN_TYPES.NUMBER] },
     ],
+    [KEYWORDS.RECT]: [
+        { name: 'x', types: [TOKEN_TYPES.NUMBER] },
+        { name: 'y', types: [TOKEN_TYPES.NUMBER] },
+        { name: 'width', types: [TOKEN_TYPES.NUMBER] },
+        { name: 'height', types: [TOKEN_TYPES.NUMBER] },
+        { name: 'fill', types: [TOKEN_TYPES.NUMBER, TOKEN_TYPES.STRING] },
+    ],
+    [KEYWORDS.CIRCLE]: [
+        { name: 'cx', types: [TOKEN_TYPES.NUMBER] },
+        { name: 'cy', types: [TOKEN_TYPES.NUMBER] },
+        { name: 'r', types: [TOKEN_TYPES.NUMBER] },
+        { name: 'fill', types: [TOKEN_TYPES.NUMBER, TOKEN_TYPES.STRING] },
+    ],
 };

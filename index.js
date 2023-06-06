@@ -1,4 +1,5 @@
 import { argumentsMap } from './modules/constants/arguments-map.constant.js';
+import { defaultCode } from './modules/constants/default-code.constant.js';
 import { analizeStepResults, debounce } from './modules/utils/functions.util.js';
 import { generateCode } from './modules/utils/generate-code.util.js';
 import { parse } from './modules/utils/parse.util.js';
@@ -28,4 +29,6 @@ const handleCodeAreaChange = (event) => {
     document.querySelector('#preview').innerHTML = svg;
 };
 
-codeArea.addEventListener('input', debounce(handleCodeAreaChange, 2000));
+codeArea.addEventListener('input', debounce(handleCodeAreaChange, 500));
+codeArea.textContent = defaultCode;
+codeArea.dispatchEvent(new Event('input'));
