@@ -12,5 +12,5 @@ export const generateCode = (transformedAst) => {
         ({ tag, attr }) => `\n\t<${tag} ${transformAttributes(attr)}></${tag}>`,
     );
 
-    return `<svg ${rootAttributes}>${elements}\n</svg>`;
+    return `<svg ${rootAttributes}>${elements.join('')}\n</svg>`;
 };
